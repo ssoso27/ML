@@ -41,18 +41,17 @@ class Softmax:
         # Training set
         self.training_num = int(self.data_num * (4/5)) # 전체 data의 80%만 train
 
-        self.X_training = xy[0:y_num, 0:self.training_num]
-        self.Y_training = xy[y_num: , 0:self.training_num]
+        self.X_training = np.transpose(xy[0:y_num, 0:self.training_num])
+        self.Y_training = np.transpose(xy[y_num: , 0:self.training_num])
 
         print (self.X_training)
         print (self.Y_training)
 
         # Testing set
-        self.X_testing = xy[0:y_num, self.training_num:] # training data가 아닌 data
-        self.Y_testing = xy[y_num: , self.training_num:]
+        self.X_testing = np.transpose(xy[0:y_num, self.training_num:]) # training data가 아닌 data
+        self.Y_testing = np.transpose(xy[y_num: , self.training_num:])
 
-        self.w_num = len(self.X_training)
-        self.x_num = len(self.X_training)
+        self.x_num = self.w_num = len(self.X_training[0, ])
         self.y_num = y_num
 
         print (self.w_num, self.x_num, self.y_num, self.data_num, self.training_num)
@@ -73,13 +72,13 @@ class Softmax:
         self.W = tf.Variable(tf.zeros([self.training_num, self.training_num]))
 
         # Our hypothesis
-        self.hypothesis = tf.nn.softmax(tf.matmul(self.X, self.W))
+        self.hypothesis = tf.nn.softmax(tf.matmul(self.W, self.X))
 
         # cost function
         self.cost = tf.reduce_mean(-tf.reduce_sum(self.Y * tf.log(self.hypothesis), reduction_indices=1))
 
         # Minimize
-        a = tf.Variable(0.1)  # Learning rate
+        a = tf.Variable(0.001)  # Learning rate
         optimizer = tf.train.GradientDescentOptimizer(a).minimize(self.cost)
 
         # initialize the variables

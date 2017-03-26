@@ -5,6 +5,8 @@ import numpy as np
 xy = np.loadtxt('train.txt', unpack=True, dtype='float32')
 x_data = np.transpose(xy[0:3])
 y_data = np.transpose(xy[3:])
+print (x_data)
+print (y_data)
 
 # tf Graph Input
 X = tf.placeholder("float", [None, 3]) # x1, x2 and 1 (for bias)
