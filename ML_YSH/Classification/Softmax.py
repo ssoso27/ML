@@ -69,16 +69,16 @@ class Softmax:
     # gildong.learn(0.001)와 같이 사용
     def learn(self, finish_point):
 
-        self.W = tf.Variable(tf.zeros([self.training_num, self.training_num]))
+        self.W = tf.Variable(tf.zeros([self.x_num, self.y_num]))
 
         # Our hypothesis
-        self.hypothesis = tf.nn.softmax(tf.matmul(self.W, self.X))
+        self.hypothesis = tf.nn.softmax(tf.matmul(self.X, self.W))
 
         # cost function
         self.cost = tf.reduce_mean(-tf.reduce_sum(self.Y * tf.log(self.hypothesis), reduction_indices=1))
 
         # Minimize
-        a = tf.Variable(0.001)  # Learning rate
+        a = tf.Variable(0.5)  # Learning rate
         optimizer = tf.train.GradientDescentOptimizer(a).minimize(self.cost)
 
         # initialize the variables
@@ -90,33 +90,35 @@ class Softmax:
         # Fit the line
         print("step, cost, W")
 
-        for step in range(2001):
+        # for step in range(2001):
+        #     self.sess.run(optimizer, feed_dict={self.X: self.X_training, self.Y: self.Y_training})
+        #     if step % 200 == 0:
+        #         print(step, self.sess.run(self.cost, feed_dict={self.X: self.X_training, self.Y: self.Y_training}), self.sess.run(self.W))
+
+        step = 0
+        while True:
             self.sess.run(optimizer, feed_dict={self.X: self.X_training, self.Y: self.Y_training})
+            step += 1
             if step % 200 == 0:
                 print(step, self.sess.run(self.cost, feed_dict={self.X: self.X_training, self.Y: self.Y_training}), self.sess.run(self.W))
-
-        # step = 0
-        # while True:
-        #     self.sess.run(train, feed_dict={self.X: self.X_training, self.Y: self.Y_training})
-        #     step += 1
-        #     if step % 20 == 0:
-        #         print(step, self.sess.run(self.cost, feed_dict={self.X: self.X_training, self.Y: self.Y_training}), self.sess.run(self.W))
-        #     if self.sess.run(self.cost, feed_dict={self.X: self.X_training, self.Y: self.Y_training}) < finish_point : # cost값이 일정 이하로 내려가면 함수 종료
-        #         print(step, self.sess.run(self.cost, feed_dict={self.X: self.X_training, self.Y: self.Y_training}),
-        #               self.sess.run(self.W))
-        #         break
+            if self.sess.run(self.cost, feed_dict={self.X: self.X_training, self.Y: self.Y_training}) < finish_point : # cost값이 일정 이하로 내려가면 함수 종료
+                print(step, self.sess.run(self.cost, feed_dict={self.X: self.X_training, self.Y: self.Y_training}),
+                      self.sess.run(self.W))
+                break
 
     # test 1
     # testing set을 이용한 학습 결과 test
     # gildong.test()와 같이 사용
     def test(self):
-        prediction = self.sess.run(self.hypothesis, feed_dict={self.X: self.X_testing}) > 0.5
-        label = self.Y_testing > 0.5
+        prediction = self.sess.run(self.hypothesis, feed_dict={self.X: self.X_testing})
+        prediction_index = tf.arg_max(prediction, 1)
+        label = tf.arg_max(self.Y_testing, 1)
+        print (prediction)
 
-        print ("testing set을 통한 예측 : ", prediction)
-        print ("실제 값 : ", label)
+        print ("testing set을 통한 예측 : ", self.sess.run(prediction_index))
+        print ("실제 값 : ", self.sess.run(label))
 
-        if prediction.all() == label.all():
+        if prediction == label:
             print ("학습 success")
         else:
             print ("학습 fail")
@@ -154,3 +156,4 @@ gildong = Softmax()
 # gildong.what_is_it([3,4])
 gildong.set_data("train_soft.txt", 3)
 gildong.learn(0.01)
+gildong.test()
